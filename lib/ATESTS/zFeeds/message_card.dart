@@ -528,11 +528,23 @@ class _PostCardTestState extends State<PostCardTest> {
                                                           .withOpacity(0),
                                                       alignment:
                                                           Alignment.center,
-                                                      child: FlatButton(
-                                                        shape: const CircleBorder(
-                                                            side: BorderSide(
-                                                                color: Colors
-                                                                    .white)),
+                                                      child:
+                                                          // FlatButton(
+                                                          //   shape: const CircleBorder(
+                                                          //       side: BorderSide(
+                                                          //           color: Colors
+                                                          //               .white)),
+                                                          TextButton(
+                                                        style: ButtonStyle(
+                                                            shape: MaterialStateProperty.all<
+                                                                    RoundedRectangleBorder>(
+                                                                RoundedRectangleBorder(
+                                                                    borderRadius:
+                                                                        BorderRadius.circular(
+                                                                            18.0),
+                                                                    side: BorderSide(
+                                                                        color: Colors
+                                                                            .white)))),
                                                         child: Icon(
                                                           videoController!.value
                                                                   .isPlaying
