@@ -1,4 +1,5 @@
 import 'dart:developer';
+import 'package:aft/ATESTS/responsive/AMobileScreenLayout.dart';
 import 'package:aft/ATESTS/screens/report_user_screen.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/foundation.dart';
@@ -173,7 +174,7 @@ class _FullMessagePollState extends State<FullMessagePoll> {
   late CommentSort _selectedCommentSort;
   late CommentFilter _selectedCommentFilter;
 
-  _otherUsers(BuildContext context) async {
+  _otherUsers(BuildContext context, String? uid) async {
     return showDialog(
         context: context,
         builder: (context) {
@@ -192,7 +193,21 @@ class _FullMessagePollState extends State<FullMessagePoll> {
                 onPressed: () {
                   performLoggedUserAction(
                     context: context,
-                    action: () {},
+                    action: () {
+                      performLoggedUserAction(
+                        context: context,
+                        action: () {
+                          FirebaseFirestore.instance
+                              .collection("users")
+                              .doc(uid)
+                              .update({
+                            'blockList': FieldValue.arrayUnion([_poll.uid])
+                          });
+                          Navigator.pop(context);
+                          print("chijbghucdbvu");
+                        },
+                      );
+                    },
                   );
                 },
               ),
@@ -353,7 +368,11 @@ class _FullMessagePollState extends State<FullMessagePoll> {
                                     alignment: Alignment.center,
                                     child: IconButton(
                                       onPressed: () {
-                                        Navigator.of(context).pop();
+                                        Navigator.push(
+                                            context,
+                                            MaterialPageRoute(
+                                                builder: (context) =>
+                                                    MobileScreenLayout()));
                                       },
                                       icon: const Icon(Icons.arrow_back,
                                           color: Colors.black),
@@ -597,8 +616,8 @@ class _FullMessagePollState extends State<FullMessagePoll> {
                                                 onPressed: _poll.uid ==
                                                         user?.uid
                                                     ? () => _deletePost(context)
-                                                    : () =>
-                                                        _otherUsers(context),
+                                                    : () => _otherUsers(
+                                                        context, user?.uid),
                                                 icon:
                                                     const Icon(Icons.more_vert),
                                               ),

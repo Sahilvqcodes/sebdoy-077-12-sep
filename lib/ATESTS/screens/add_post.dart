@@ -1507,7 +1507,10 @@ class _AddPostState extends State<AddPost> {
                                                                         'ConnectionState.done');
                                                                     break;
                                                                 }
-
+                                                                print(
+                                                                    "snapshot.data!");
+                                                                print(snapshot
+                                                                    .data!);
                                                                 return snapshot
                                                                             .data !=
                                                                         null

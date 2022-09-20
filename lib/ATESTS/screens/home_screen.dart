@@ -85,7 +85,9 @@ class _FeedScreenState extends State<FeedScreen> {
                 .collection('posts')
                 .where("country", isEqualTo: countryCode))
         .where("global", isEqualTo: global)
+        // .orderBy("category", descending: true)
         .orderBy("score", descending: true)
+        // .orderBy("category", descending: true)
         .orderBy("datePublished", descending: false)
         .snapshots()
         .listen((event) {
@@ -109,6 +111,14 @@ class _FeedScreenState extends State<FeedScreen> {
             break;
         }
       }
+      // postsList
+      //     .where((value) => value != null)
+      //     .toList()
+      //     .sort((a, b) => b.category.compareTo(a.category));
+
+      postsList.forEach(
+          ((element) => print("element.category ${element.category}")));
+
       setState(() {});
     });
   }
@@ -194,6 +204,7 @@ class _FeedScreenState extends State<FeedScreen> {
   }
 
   loadCountryFilterValue() async {
+    // print("kbncdijkcdcdcdvcdfv");
     SharedPreferences prefs = await SharedPreferences.getInstance();
     setState(() {
       int selectedCountryIndex = prefs.getInt('countryRadio') ?? 0;
@@ -215,6 +226,7 @@ class _FeedScreenState extends State<FeedScreen> {
   @override
   Widget build(BuildContext context) {
     final User? user = Provider.of<UserProvider>(context).getUser;
+
     return SafeArea(
       child: Scaffold(
         backgroundColor: const Color.fromARGB(255, 245, 245, 245),

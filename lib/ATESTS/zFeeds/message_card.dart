@@ -1,5 +1,6 @@
 import 'dart:developer';
 
+import 'package:chewie/chewie.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 
 import 'package:flutter/foundation.dart';
@@ -47,11 +48,13 @@ class _PostCardTestState extends State<PostCardTest> {
   int commentLen = 0;
   String placement = '';
   var testt = 21100;
+  var chewieController;
 
   @override
   void initState() {
     super.initState();
     _post = widget.post;
+    print("widget.post ${widget.post.category}");
     placement = '#${(widget.indexPlacement + 1).toString()}';
     controller = YoutubePlayerController(
       // initialVideoId: '${widget.snap['videoUrl']}',
@@ -65,11 +68,21 @@ class _PostCardTestState extends State<PostCardTest> {
       ),
     );
     getUserDetails();
+
+    print("_post.postUrl ${_post.postUrl}");
     if (_post.selected == 2) {
       videoController = VideoPlayerController.network(_post.postUrl);
       _initializeVideoPlayerFuture = videoController!.initialize().then((_) {
         setState(() {});
       });
+      // videoController!.setLooping(true);
+      // videoController!.setVolume(0.0);
+      // videoController!.play();
+      chewieController = ChewieController(
+        videoPlayerController: videoController!,
+        autoPlay: false,
+        looping: true,
+      );
     }
 
     controller.onEnterFullscreen = () {
@@ -103,12 +116,13 @@ class _PostCardTestState extends State<PostCardTest> {
 
   getUserDetails() async {
     User userProfile = await _authMethods.getUserProfileDetails(_post.uid);
+
     setState(() {
       _userProfile = userProfile;
     });
   }
 
-  _otherUsers(BuildContext context) async {
+  _otherUsers(BuildContext context, [String? uid]) async {
     return showDialog(
         context: context,
         builder: (context) {
@@ -127,7 +141,16 @@ class _PostCardTestState extends State<PostCardTest> {
                 onPressed: () {
                   performLoggedUserAction(
                     context: context,
-                    action: () {},
+                    action: () {
+                      FirebaseFirestore.instance
+                          .collection("users")
+                          .doc(uid)
+                          .update({
+                        'blockList': FieldValue.arrayUnion([_post.uid])
+                      });
+                      Navigator.pop(context);
+                      print("chijbghucdbvu");
+                    },
                   );
                 },
               ),
@@ -354,7 +377,7 @@ class _PostCardTestState extends State<PostCardTest> {
                       child: IconButton(
                         onPressed: _post.uid == user?.uid
                             ? () => _deletePost(context)
-                            : () => _otherUsers(context),
+                            : () => _otherUsers(context, user?.uid),
                         icon: const Icon(Icons.more_vert),
                       ),
                     ),
@@ -519,9 +542,10 @@ class _PostCardTestState extends State<PostCardTest> {
                                                 children: [
                                                   player,
                                                   Positioned.fill(
-                                                    child: VideoPlayer(
-                                                        videoController!),
-                                                  ),
+                                                      child: Chewie(
+                                                    controller:
+                                                        chewieController,
+                                                  )),
                                                   Positioned.fill(
                                                     child: Container(
                                                       color: Colors.grey
@@ -577,24 +601,24 @@ class _PostCardTestState extends State<PostCardTest> {
                                                       ),
                                                     ),
                                                   ),
-                                                  Positioned.fill(
-                                                    child: Container(
-                                                      alignment: Alignment
-                                                          .bottomCenter,
-                                                      child:
-                                                          VideoProgressIndicator(
-                                                        videoController!,
-                                                        allowScrubbing: true,
-                                                        padding:
-                                                            const EdgeInsets
-                                                                .all(3),
-                                                        colors: VideoProgressColors(
-                                                            playedColor: Theme
-                                                                    .of(context)
-                                                                .primaryColor),
-                                                      ),
-                                                    ),
-                                                  ),
+                                                  // Positioned.fill(
+                                                  //   child: Container(
+                                                  //     alignment: Alignment
+                                                  //         .bottomCenter,
+                                                  //     child:
+                                                  //         VideoProgressIndicator(
+                                                  //       videoController!,
+                                                  //       allowScrubbing: true,
+                                                  //       padding:
+                                                  //           const EdgeInsets
+                                                  //               .all(3),
+                                                  //       colors: VideoProgressColors(
+                                                  //           playedColor: Theme
+                                                  //                   .of(context)
+                                                  //               .primaryColor),
+                                                  //     ),
+                                                  //   ),
+                                                  // ),
                                                 ],
                                               ),
                                             );
@@ -749,7 +773,8 @@ class _PostCardTestState extends State<PostCardTest> {
                                     //         3, testt.toString().length, 'k')
                                     //     : testt.toString(),
                                     // ' ${widget.snap['plus'].length - widget.snap['minus'].length}',
-                                    ' ${_post.plus.length - _post.minus.length}',
+                                    // ' ${_post.plus.length - _post.minus.length}',
+                                    ' ${_post.score}',
                                     // ' 32.4k',
                                     textAlign: TextAlign.center,
                                     style: const TextStyle(

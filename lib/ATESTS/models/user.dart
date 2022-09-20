@@ -15,6 +15,7 @@ class User {
   final profileFlag;
   final profileBadge;
   final String usernameLower;
+  final List blockList;
 
   // final List followers;
   // final List following;
@@ -31,6 +32,7 @@ class User {
     required this.isPending,
     required this.usernameLower,
     required this.profileBadge,
+    required this.blockList,
 
     // required this.followers,
     // required this.following,
@@ -52,25 +54,29 @@ class User {
         "profileFlag": profileFlag,
         "profileBadge": profileBadge,
         "usernameLower": usernameLower,
+        "blockList": blockList,
       };
 
   static User fromSnap(DocumentSnapshot snap) {
     var snapshot = snap.data() as Map<String, dynamic>;
 
     return User(
-      username: snapshot['username'],
-      uid: snapshot['uid'],
-      photoUrl: snapshot['photoUrl'],
-      email: snapshot['email'],
-      country: snapshot['country'],
-      isPending: snapshot['isPending'],
-      bio: snapshot['bio'],
-      dateCreated: snapshot['dateCreated'],
-      profileFlag: snapshot['profileFlag'],
-      profileBadge: snapshot['profileBadge'],
-      usernameLower: snap['usernameLower'],
-      // followers: snapshot['followers'],
-      // following: snapshot['following'],
-    );
+        username: snapshot['username'],
+        uid: snapshot['uid'],
+        photoUrl: snapshot['photoUrl'],
+        email: snapshot['email'],
+        country: snapshot['country'],
+        isPending: snapshot['isPending'],
+        bio: snapshot['bio'],
+        dateCreated: snapshot['dateCreated'],
+        profileFlag: snapshot['profileFlag'],
+        profileBadge: snapshot['profileBadge'],
+        usernameLower: snap['usernameLower'],
+        blockList: snapshot["blockList"] ?? []
+        // followers: snapshot['followers'],
+        // following: snapshot['following'],
+        );
   }
+
+  static fromJson(json) {}
 }

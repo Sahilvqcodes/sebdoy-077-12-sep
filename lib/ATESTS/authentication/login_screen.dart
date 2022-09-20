@@ -38,18 +38,19 @@ class _LoginScreenState extends State<LoginScreen> {
     setState(() {
       _isLoading = true;
     });
-    String email = _emailController.text;
+    String email = _emailController.text.toLowerCase();
 
     // Login with username
     if (!email.contains('@')) {
       var user = await FirebaseFirestore.instance
           .collection('users')
-          .where('username', isEqualTo: email)
+          .where('usernameLower', isEqualTo: email)
           .get();
       if (user.docs.isNotEmpty) {
         email = user.docs.first.data()['email'];
       }
     }
+
     String res = await AuthMethods()
         .loginUser(email: email, password: _passwordController.text);
 

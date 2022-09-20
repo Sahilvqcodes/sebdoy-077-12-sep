@@ -1,3 +1,4 @@
+import 'package:aft/ATESTS/models/post.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
@@ -41,6 +42,7 @@ class _PollCardState extends State<PollCard> {
   int commentLen = 0;
   String placement = '';
   var testt = 21100;
+  late Poll PollData;
 
   final TextStyle _pollOptionTextStyle = const TextStyle(
     fontSize: 16,
@@ -85,7 +87,7 @@ class _PollCardState extends State<PollCard> {
     );
   }
 
-  _otherUsers(BuildContext context) async {
+  _otherUsers(BuildContext context, String? uid) async {
     return showDialog(
         context: context,
         builder: (context) {
@@ -104,7 +106,16 @@ class _PollCardState extends State<PollCard> {
                 onPressed: () {
                   performLoggedUserAction(
                     context: context,
-                    action: () {},
+                    action: () {
+                      FirebaseFirestore.instance
+                          .collection("users")
+                          .doc(uid)
+                          .update({
+                        'blockList': FieldValue.arrayUnion([_poll.uid])
+                      });
+                      Navigator.pop(context);
+                      print("chijbghucdbvu");
+                    },
                   );
                 },
               ),
@@ -177,6 +188,7 @@ class _PollCardState extends State<PollCard> {
   @override
   Widget build(BuildContext context) {
     _poll = widget.poll;
+
     final User? user = Provider.of<UserProvider>(context).getUser;
     print('_poll.endDate: ${_poll.endDate.runtimeType}');
 
@@ -228,7 +240,7 @@ class _PollCardState extends State<PollCard> {
                                 child: Text(
                               _poll.username,
                               textAlign: TextAlign.start,
-                              style: TextStyle(
+                              style: const TextStyle(
                                   fontSize: 16,
                                   fontWeight: FontWeight.bold,
                                   color: Colors.black,
@@ -255,7 +267,7 @@ class _PollCardState extends State<PollCard> {
                           child: IconButton(
                             onPressed: _poll.uid == user?.uid
                                 ? () => _deletePost(context)
-                                : () => _otherUsers(context),
+                                : () => _otherUsers(context, user?.uid),
                             icon: const Icon(Icons.more_vert),
                           ),
                         ),
@@ -267,8 +279,8 @@ class _PollCardState extends State<PollCard> {
             ),
             const SizedBox(height: 8),
             InkWell(
-              onTap: () {
-                Navigator.push(
+              onTap: () async {
+                await Navigator.pushReplacement(
                   context,
                   MaterialPageRoute(
                       builder: (context) => FullMessagePoll(
@@ -301,10 +313,24 @@ class _PollCardState extends State<PollCard> {
                           action: () async {
                             await FirestoreMethods().poll(
                               poll: _poll,
-                              uid: user?.uid ?? '',
+                              uid: user?.uid ?? "",
                               optionIndex: pollOption.id!,
                             );
                           });
+
+                      var PostTest = await FirebaseFirestore.instance
+                          .collection("polls")
+                          .doc(_poll.pollId);
+                      PostTest.get().then(
+                        (DocumentSnapshot doc) {
+                          final data = doc.data() as Map<String, dynamic>;
+
+                          PollData = Poll.fromMap(data);
+                          print("_poll.allVotesUIDs ${PollData.allVotesUIDs}");
+                          _poll = PollData;
+                          print("_poll.allVotesUIDs ${_poll.allVotesUIDs}");
+                        },
+                      );
                     }
 
                     print('newTotalVotes: ${newTotalVotes}');

@@ -1,4 +1,5 @@
 import 'dart:typed_data';
+import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
@@ -71,18 +72,18 @@ class AuthMethods {
         //add user to our database
 
         model.User user = model.User(
-          username: username,
-          usernameLower: username.toLowerCase(),
-          uid: cred.user!.uid,
-          dateCreated: DateTime.now(),
-          photoUrl: profilePicUrl,
-          email: email,
-          country: country,
-          isPending: isPending,
-          bio: trimmedBio,
-          profileFlag: 'false',
-          profileBadge: 'false',
-        );
+            username: username,
+            usernameLower: username.toLowerCase(),
+            uid: cred.user!.uid,
+            dateCreated: DateTime.now(),
+            photoUrl: profilePicUrl,
+            email: email,
+            country: country,
+            isPending: isPending,
+            bio: trimmedBio,
+            profileFlag: 'false',
+            profileBadge: 'false',
+            blockList: []);
 
         await _firestore.collection('users').doc(cred.user!.uid).set(
               user.toJson(),
@@ -356,6 +357,7 @@ class AuthMethods {
 
       if (user != null) {
         await deletePostsAndPolls(uid: uid);
+        await deleteEmailAttachmentPhotos(uid);
         await deleteUserDoc(uid);
         await user.delete();
         await AuthMethods().signOut();
@@ -430,6 +432,20 @@ class AuthMethods {
   //     print(err.toString());
   //   }
   // }
+  deleteEmailAttachmentPhotos(String uid) async {
+    final Reference storageRef = await FirebaseStorage.instance
+        .ref()
+        .child("email_attachment_photos")
+        .child(uid);
+
+    storageRef.listAll().then((result) {
+      print("result is ${result.items}");
+      result.items.forEach((element) {
+        element.delete();
+      });
+      print("deletedata ${result.items}");
+    });
+  }
 
   deleteUserDoc(String uid) async {
     await _firestore.collection('users').doc(uid).delete();

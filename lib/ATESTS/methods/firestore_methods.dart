@@ -91,11 +91,14 @@ class FirestoreMethods {
       print('_poll : ${poll.toJson()}');
       print('pollId : $pollId');
 
-      _firestore.collection('polls').doc(pollId).update({
-        'totalVotes': FieldValue.increment(1),
-        'vote$optionIndex': FieldValue.arrayUnion([uid]),
-        'allVotesUIDs': FieldValue.arrayUnion([uid]),
-      });
+      if (poll.allVotesUIDs.contains(uid)) {
+      } else {
+        _firestore.collection('polls').doc(pollId).update({
+          'totalVotes': FieldValue.increment(1),
+          'vote$optionIndex': FieldValue.arrayUnion([uid]),
+          'allVotesUIDs': FieldValue.arrayUnion([uid]),
+        });
+      }
 
       print('POLL SUCCESSFULL');
 
