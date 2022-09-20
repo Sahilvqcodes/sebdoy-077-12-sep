@@ -209,6 +209,13 @@ class _PostCardTestState extends State<PostCardTest> {
         });
   }
 
+  User? blockedUser;
+  getUserBlockList(String? uid) async {
+    var querySnapshot =
+        await FirebaseFirestore.instance.collection("users").doc(uid).get();
+    blockedUser = User.fromSnap(querySnapshot);
+    return blockedUser;
+  }
   // @override
   // void deactivate() {
   //   controller.pause();
@@ -430,634 +437,730 @@ class _PostCardTestState extends State<PostCardTest> {
               //   ),
               // ),
 
-              Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  InkWell(
-                    onTap: () {
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                            builder: (context) => FullMessage(
-                                post: _post,
-                                indexPlacement: widget.indexPlacement)),
-                      );
-                    },
-                    child: Container(
-                      alignment: Alignment.center,
-
-                      // height: 314,
-                      // width: 273,
-                      // constraints:
-                      //     BoxConstraints(minHeight: 314, minWidth: 273),
-                      // color: Colors.blue,
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.center,
-                        children: [
-                          Padding(
-                            padding: EdgeInsets.only(
-                                top: 8, bottom: _post.selected != 0 ? 4 : 0),
-                            child: SizedBox(
-                              // width: 300,
-
-                              width: MediaQuery.of(context).size.width * 0.88,
-
-                              child: Text(
-                                '${_post.title}', textAlign: TextAlign.center,
-                                // maxLines: 8,
-                                // overflow: TextOverflow.ellipsis,
-                                style: const TextStyle(
-                                  fontSize: 16,
-                                  fontWeight: FontWeight.w500,
-                                ),
-                              ),
-                            ),
-                          ),
-
-                          // Padding(
-                          //   padding: const EdgeInsets.only(right: 5.0),
-                          //   child:
-                          //   Container(player),
-                          //   Text(
-                          //     '${widget.snap['body']}',
-                          //     maxLines: 11,
-                          //     overflow: TextOverflow.ellipsis,
-                          //     style: TextStyle(),
-                          //   ),
-                          // ),
-                          // Padding(
-                          //   padding: const EdgeInsets.only(right: 8.0),
-                          //   child: player,
-                          // ),
-                          _post.selected == 1
-                              ? InkWell(
+              FutureBuilder(
+                future: getUserBlockList(user?.uid),
+                builder: (context, AsyncSnapshot snapshot) {
+                  if (!snapshot.hasData || snapshot.data == null) {
+                    return Container(
+                      height: 100,
+                    );
+                  }
+                  return !blockedUser!.blockList.contains(_post.uid)
+                      ? Column(
+                          children: [
+                            Row(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              children: [
+                                InkWell(
                                   onTap: () {
                                     Navigator.push(
                                       context,
                                       MaterialPageRoute(
-                                          builder: (context) => FullImageScreen(
-                                                post: _post,
-                                              )),
+                                          builder: (context) => FullMessage(
+                                              post: _post,
+                                              indexPlacement:
+                                                  widget.indexPlacement)),
                                     );
                                   },
                                   child: Container(
-                                    // height: 150,
-                                    height: MediaQuery.of(context).size.width *
-                                        0.445,
-                                    width: MediaQuery.of(context).size.width *
-                                        0.89,
-                                    color: const Color.fromARGB(
-                                        255, 245, 245, 245),
+                                    alignment: Alignment.center,
 
-                                    child: Image.network(
-                                      _post.postUrl,
-                                      // fit: BoxFit.fill,
-                                    ),
-                                  ),
-                                )
-                              : _post.selected == 2
-                                  ? FutureBuilder(
-                                      future: _initializeVideoPlayerFuture,
-                                      builder: (context, snapshot) {
-                                        if (snapshot.connectionState ==
-                                            ConnectionState.done) {
-                                          return LayoutBuilder(
-                                              builder: (context, constraints) {
-                                            if (kIsWeb &&
-                                                constraints.maxWidth > 800) {
-                                              return Row(
-                                                crossAxisAlignment:
-                                                    CrossAxisAlignment.start,
-                                                children: [
-                                                  const Expanded(child: player),
-                                                  const SizedBox(
-                                                    width: 500,
-                                                  ),
-                                                ],
-                                              );
-                                            }
-                                            return SizedBox(
-                                              width: 324,
-                                              child: Stack(
-                                                children: [
-                                                  player,
-                                                  Positioned.fill(
-                                                      child: Chewie(
-                                                    controller:
-                                                        chewieController,
-                                                  )),
-                                                  Positioned.fill(
-                                                    child: Container(
-                                                      color: Colors.grey
-                                                          .withOpacity(0),
-                                                      alignment:
-                                                          Alignment.center,
-                                                      child:
-                                                          // FlatButton(
-                                                          //   shape: const CircleBorder(
-                                                          //       side: BorderSide(
-                                                          //           color: Colors
-                                                          //               .white)),
-                                                          TextButton(
-                                                        style: ButtonStyle(
-                                                            shape: MaterialStateProperty.all<
-                                                                    RoundedRectangleBorder>(
-                                                                RoundedRectangleBorder(
-                                                                    borderRadius:
-                                                                        BorderRadius.circular(
-                                                                            18.0),
-                                                                    side: BorderSide(
-                                                                        color: Colors
-                                                                            .white)))),
-                                                        child: Icon(
-                                                          videoController!.value
-                                                                  .isPlaying
-                                                              ? Icons.pause
-                                                              : Icons
-                                                                  .play_arrow,
-                                                          color: Colors.white,
-                                                        ),
-                                                        onPressed: () {
-                                                          // _timer?.cancel();
+                                    // height: 314,
+                                    // width: 273,
+                                    // constraints:
+                                    //     BoxConstraints(minHeight: 314, minWidth: 273),
+                                    // color: Colors.blue,
+                                    child: Column(
+                                      crossAxisAlignment:
+                                          CrossAxisAlignment.center,
+                                      children: [
+                                        Padding(
+                                          padding: EdgeInsets.only(
+                                              top: 8,
+                                              bottom:
+                                                  _post.selected != 0 ? 4 : 0),
+                                          child: SizedBox(
+                                            // width: 300,
 
-                                                          // pause while video is playing, play while video is pausing
-                                                          setState(() {
-                                                            videoController!
-                                                                    .value
-                                                                    .isPlaying
-                                                                ? videoController!
-                                                                    .pause()
-                                                                : videoController!
-                                                                    .play();
-                                                          });
+                                            width: MediaQuery.of(context)
+                                                    .size
+                                                    .width *
+                                                0.88,
 
-                                                          // Auto dismiss overlay after 1 second
-                                                          // _timer = Timer.periodic(Duration(milliseconds: 1000), (_) {
-                                                          //   setState(() {
-                                                          //     _onTouch = false;
-                                                          //   });
-                                                          // });
-                                                        },
-                                                      ),
-                                                    ),
-                                                  ),
-                                                  // Positioned.fill(
-                                                  //   child: Container(
-                                                  //     alignment: Alignment
-                                                  //         .bottomCenter,
-                                                  //     child:
-                                                  //         VideoProgressIndicator(
-                                                  //       videoController!,
-                                                  //       allowScrubbing: true,
-                                                  //       padding:
-                                                  //           const EdgeInsets
-                                                  //               .all(3),
-                                                  //       colors: VideoProgressColors(
-                                                  //           playedColor: Theme
-                                                  //                   .of(context)
-                                                  //               .primaryColor),
-                                                  //     ),
-                                                  //   ),
-                                                  // ),
-                                                ],
+                                            child: Text(
+                                              '${_post.title}',
+                                              textAlign: TextAlign.center,
+                                              // maxLines: 8,
+                                              // overflow: TextOverflow.ellipsis,
+                                              style: const TextStyle(
+                                                fontSize: 16,
+                                                fontWeight: FontWeight.w500,
                                               ),
-                                            );
-                                          });
-                                        } else {
-                                          return const Center(
-                                              child:
-                                                  CircularProgressIndicator());
-                                        }
-                                      },
-                                    )
-                                  : _post.selected == 3
-                                      ? LayoutBuilder(
-                                          builder: (context, constraints) {
-                                          if (kIsWeb &&
-                                              constraints.maxWidth > 800) {
-                                            return Row(
-                                              crossAxisAlignment:
-                                                  CrossAxisAlignment.start,
-                                              children: [
-                                                const Expanded(child: player),
-                                                const SizedBox(
-                                                  width: 500,
+                                            ),
+                                          ),
+                                        ),
+
+                                        // Padding(
+                                        //   padding: const EdgeInsets.only(right: 5.0),
+                                        //   child:
+                                        //   Container(player),
+                                        //   Text(
+                                        //     '${widget.snap['body']}',
+                                        //     maxLines: 11,
+                                        //     overflow: TextOverflow.ellipsis,
+                                        //     style: TextStyle(),
+                                        //   ),
+                                        // ),
+                                        // Padding(
+                                        //   padding: const EdgeInsets.only(right: 8.0),
+                                        //   child: player,
+                                        // ),
+                                        _post.selected == 1
+                                            ? InkWell(
+                                                onTap: () {
+                                                  Navigator.push(
+                                                    context,
+                                                    MaterialPageRoute(
+                                                        builder: (context) =>
+                                                            FullImageScreen(
+                                                              post: _post,
+                                                            )),
+                                                  );
+                                                },
+                                                child: Container(
+                                                  // height: 150,
+                                                  height: MediaQuery.of(context)
+                                                          .size
+                                                          .width *
+                                                      0.445,
+                                                  width: MediaQuery.of(context)
+                                                          .size
+                                                          .width *
+                                                      0.89,
+                                                  color: const Color.fromARGB(
+                                                      255, 245, 245, 245),
+
+                                                  child: Image.network(
+                                                    _post.postUrl,
+                                                    // fit: BoxFit.fill,
+                                                  ),
                                                 ),
-                                              ],
-                                            );
-                                          }
-                                          return SizedBox(
-                                            width: 324,
-                                            child: Stack(
-                                              children: [
-                                                player,
-                                                Positioned.fill(
-                                                  child: YoutubeValueBuilder(
-                                                    controller: controller,
-                                                    builder: (context, value) {
-                                                      return AnimatedCrossFade(
-                                                        crossFadeState:
-                                                            value.isReady
-                                                                ? CrossFadeState
-                                                                    .showSecond
-                                                                : CrossFadeState
-                                                                    .showFirst,
-                                                        duration:
-                                                            const Duration(
-                                                                milliseconds:
-                                                                    300),
-                                                        secondChild: Container(
-                                                            child:
-                                                                const SizedBox
-                                                                    .shrink()),
-                                                        firstChild: Material(
-                                                          child: DecoratedBox(
-                                                            child: const Center(
-                                                              child:
-                                                                  CircularProgressIndicator(),
-                                                            ),
-                                                            decoration:
-                                                                BoxDecoration(
-                                                              image:
-                                                                  DecorationImage(
-                                                                image:
-                                                                    NetworkImage(
-                                                                  YoutubePlayerController
-                                                                      .getThumbnail(
-                                                                    videoId:
-                                                                        controller
-                                                                            .initialVideoId,
-                                                                    quality:
-                                                                        ThumbnailQuality
-                                                                            .medium,
+                                              )
+                                            : _post.selected == 2
+                                                ? FutureBuilder(
+                                                    future:
+                                                        _initializeVideoPlayerFuture,
+                                                    builder:
+                                                        (context, snapshot) {
+                                                      if (snapshot
+                                                              .connectionState ==
+                                                          ConnectionState
+                                                              .done) {
+                                                        return LayoutBuilder(
+                                                            builder: (context,
+                                                                constraints) {
+                                                          if (kIsWeb &&
+                                                              constraints
+                                                                      .maxWidth >
+                                                                  800) {
+                                                            return Row(
+                                                              crossAxisAlignment:
+                                                                  CrossAxisAlignment
+                                                                      .start,
+                                                              children: [
+                                                                const Expanded(
+                                                                    child:
+                                                                        player),
+                                                                const SizedBox(
+                                                                  width: 500,
+                                                                ),
+                                                              ],
+                                                            );
+                                                          }
+                                                          return SizedBox(
+                                                            width: 324,
+                                                            child: Stack(
+                                                              children: [
+                                                                player,
+                                                                Positioned.fill(
+                                                                    child:
+                                                                        Chewie(
+                                                                  controller:
+                                                                      chewieController,
+                                                                )),
+                                                                Positioned.fill(
+                                                                  child:
+                                                                      Container(
+                                                                    color: Colors
+                                                                        .grey
+                                                                        .withOpacity(
+                                                                            0),
+                                                                    alignment:
+                                                                        Alignment
+                                                                            .center,
+                                                                    child:
+                                                                        // FlatButton(
+                                                                        //   shape: const CircleBorder(
+                                                                        //       side: BorderSide(
+                                                                        //           color: Colors
+                                                                        //               .white)),
+                                                                        TextButton(
+                                                                      style: ButtonStyle(
+                                                                          shape: MaterialStateProperty.all<RoundedRectangleBorder>(RoundedRectangleBorder(
+                                                                              borderRadius: BorderRadius.circular(18.0),
+                                                                              side: BorderSide(color: Colors.white)))),
+                                                                      child:
+                                                                          Icon(
+                                                                        videoController!.value.isPlaying
+                                                                            ? Icons.pause
+                                                                            : Icons.play_arrow,
+                                                                        color: Colors
+                                                                            .white,
+                                                                      ),
+                                                                      onPressed:
+                                                                          () {
+                                                                        // _timer?.cancel();
+
+                                                                        // pause while video is playing, play while video is pausing
+                                                                        setState(
+                                                                            () {
+                                                                          videoController!.value.isPlaying
+                                                                              ? videoController!.pause()
+                                                                              : videoController!.play();
+                                                                        });
+
+                                                                        // Auto dismiss overlay after 1 second
+                                                                        // _timer = Timer.periodic(Duration(milliseconds: 1000), (_) {
+                                                                        //   setState(() {
+                                                                        //     _onTouch = false;
+                                                                        //   });
+                                                                        // });
+                                                                      },
+                                                                    ),
                                                                   ),
                                                                 ),
-                                                              ),
+                                                                // Positioned.fill(
+                                                                //   child: Container(
+                                                                //     alignment: Alignment
+                                                                //         .bottomCenter,
+                                                                //     child:
+                                                                //         VideoProgressIndicator(
+                                                                //       videoController!,
+                                                                //       allowScrubbing: true,
+                                                                //       padding:
+                                                                //           const EdgeInsets
+                                                                //               .all(3),
+                                                                //       colors: VideoProgressColors(
+                                                                //           playedColor: Theme
+                                                                //                   .of(context)
+                                                                //               .primaryColor),
+                                                                //     ),
+                                                                //   ),
+                                                                // ),
+                                                              ],
                                                             ),
-                                                          ),
-                                                        ),
-                                                      );
+                                                          );
+                                                        });
+                                                      } else {
+                                                        return const Center(
+                                                            child:
+                                                                CircularProgressIndicator());
+                                                      }
                                                     },
-                                                  ),
-                                                ),
-                                              ],
-                                            ),
-                                          );
-                                        })
-                                      : Container()
-                        ],
-                      ),
-                    ),
-                  ),
-                ],
-              ),
-
-              Padding(
-                padding: const EdgeInsets.only(
-                  top: 8,
-                ),
-                child: Container(
-                  height: 60,
-                  decoration: const BoxDecoration(
-                    // color: Colors.orange,
-                    border: Border(
-                      top: BorderSide(
-                          width: 1, color: Color.fromARGB(255, 218, 216, 216)),
-                    ),
-                  ),
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      SizedBox(
-                        // color: Colors.blue,
-                        height: 60,
-                        child: Column(
-                          mainAxisAlignment: MainAxisAlignment.end,
-                          children: [
-                            Container(
-                                width: 90,
-                                height: 39,
-                                alignment: Alignment.bottomCenter,
-                                child: Column(
-                                    mainAxisAlignment: MainAxisAlignment.center,
-                                    children: [
-                                      Padding(
-                                        padding:
-                                            const EdgeInsets.only(top: 12.0),
-                                        child: Text(placement,
-                                            style: const TextStyle(
-                                              fontSize: 22,
-                                              fontWeight: FontWeight.bold,
-                                              fontStyle: FontStyle.italic,
-                                            )),
-                                      )
-                                    ])),
-                            Container(
-                              // color: Colors.green,
-                              width: 88,
-                              height: 19.3,
-                              alignment: Alignment.center,
-                              child: Row(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                mainAxisAlignment: MainAxisAlignment.center,
-                                children: [
-                                  const Text('Score:',
-                                      textAlign: TextAlign.center,
-                                      style: TextStyle(
-                                          color: Colors.grey,
-                                          fontSize: 13,
-                                          letterSpacing: 0.8)),
-                                  Text(
-                                    // testt > 10000
-                                    //     ? testt.toString().replaceRange(
-                                    //         3, testt.toString().length, 'k')
-                                    //     : testt.toString(),
-                                    // ' ${widget.snap['plus'].length - widget.snap['minus'].length}',
-                                    // ' ${_post.plus.length - _post.minus.length}',
-                                    ' ${_post.score}',
-                                    // ' 32.4k',
-                                    textAlign: TextAlign.center,
-                                    style: const TextStyle(
-                                      color: Colors.black,
-                                      fontSize: 13,
-                                      fontWeight: FontWeight.bold,
-                                    ),
-                                  ),
-                                ],
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
-                      Container(
-                        // color: Colors.purple,
-                        child: Stack(
-                          children: [
-                            Container(
-                              alignment: Alignment.topCenter,
-                              height: 60,
-                              width: 59,
-                              // color: Colors.orange,
-                              child: LikeAnimation(
-                                isAnimating: _post.plus.contains(user?.uid),
-                                child: IconButton(
-                                  iconSize: 25,
-                                  onPressed: () {
-                                    performLoggedUserAction(
-                                        context: context,
-                                        action: () async {
-                                          await FirestoreMethods().plusMessage(
-                                            _post.postId,
-                                            user?.uid ?? '',
-                                            _post.plus,
-                                          );
-                                          FirestoreMethods().scoreMessage(
-                                              _post.postId,
-                                              user?.uid ?? "",
-                                              _post.plus.length -
-                                                  _post.minus.length);
-                                        });
-                                  },
-                                  icon: _post.plus.contains(user?.uid)
-                                      ? const Icon(
-                                          Icons.add_circle,
-                                          color: Colors.green,
-                                        )
-                                      : const Icon(
-                                          Icons.add_circle,
-                                          color: Color.fromARGB(
-                                              255, 206, 204, 204),
-                                        ),
-                                ),
-                              ),
-                            ),
-                            Positioned(
-                              top: 42,
-                              child: Container(
-                                width: 59,
-                                alignment: Alignment.center,
-                                child: Text('${_post.plus.length}',
-                                    // '32.4k',
-                                    style: const TextStyle(
-                                        fontSize: 13,
-                                        fontWeight: FontWeight.bold)),
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
-                      Stack(
-                        children: [
-                          Container(
-                            alignment: Alignment.topCenter,
-                            height: 60,
-                            width: 59,
-                            // color: Colors.blue,
-                            child: LikeAnimation(
-                              isAnimating: _post.neutral.contains(user?.uid),
-                              child: IconButton(
-                                iconSize: 25,
-                                onPressed: () {
-                                  performLoggedUserAction(
-                                      context: context,
-                                      action: () async {
-                                        await FirestoreMethods().neutralMessage(
-                                          _post.postId,
-                                          user?.uid ?? '',
-                                          _post.neutral,
-                                        );
-                                        FirestoreMethods().scoreMessage(
-                                            _post.postId,
-                                            user?.uid ?? '',
-                                            _post.plus.length -
-                                                _post.minus.length);
-                                      });
-                                },
-                                icon: _post.neutral.contains(user?.uid)
-                                    ? const RotatedBox(
-                                        quarterTurns: 1,
-                                        child: Icon(
-                                          Icons.pause_circle_filled,
-                                          color: Color.fromARGB(
-                                              255, 111, 111, 111),
-                                        ),
-                                      )
-                                    : const RotatedBox(
-                                        quarterTurns: 1,
-                                        child: Icon(
-                                          Icons.pause_circle_filled,
-                                          color: Color.fromARGB(
-                                              255, 206, 204, 204),
-                                        ),
-                                      ),
-                              ),
-                            ),
-                          ),
-                          Positioned(
-                            top: 42,
-                            // right: 24,
-                            child: Container(
-                              width: 59,
-                              // color: Colors.yellow,
-                              alignment: Alignment.center,
-                              child: Text('${_post.neutral.length}',
-                                  style: const TextStyle(
-                                      fontSize: 13,
-                                      fontWeight: FontWeight.bold)),
-                            ),
-                          ),
-                        ],
-                      ),
-                      Stack(
-                        children: [
-                          Container(
-                            alignment: Alignment.topCenter,
-                            height: 60,
-                            width: 59,
-                            child: LikeAnimation(
-                              isAnimating: _post.minus.contains(user?.uid),
-                              child: Container(
-                                child: IconButton(
-                                  iconSize: 25,
-                                  onPressed: () {
-                                    _post.global == "true"
-                                        ? performLoggedUserAction(
-                                            context: context,
-                                            action: () async {
-                                              await FirestoreMethods()
-                                                  .minusMessage(
-                                                _post.postId,
-                                                user?.uid ?? '',
-                                                _post.minus,
-                                              );
-                                              FirestoreMethods().scoreMessage(
-                                                  _post.postId,
-                                                  user?.uid ?? '',
-                                                  _post.plus.length -
-                                                      _post.minus.length);
-                                            })
-                                        : performLoggedUserAction(
-                                            context: context,
-                                            action: () async {
-                                              await FirestoreMethods()
-                                                  .minusMessage(
-                                                _post.postId,
-                                                user?.uid ?? '',
-                                                _post.minus,
-                                              );
-                                              FirestoreMethods().scoreMessage(
-                                                  _post.postId,
-                                                  user?.uid ?? '',
-                                                  _post.plus.length -
-                                                      _post.minus.length);
-                                            });
-                                  },
-                                  icon: _post.minus.contains(user?.uid)
-                                      ? const Icon(
-                                          Icons.do_not_disturb_on,
-                                          color: Colors.red,
-                                        )
-                                      : const Icon(
-                                          Icons.do_not_disturb_on,
-                                          color: Color.fromARGB(
-                                              255, 206, 204, 204),
-                                        ),
-                                ),
-                              ),
-                            ),
-                          ),
-                          Positioned(
-                            top: 42,
-                            child: Container(
-                              width: 59,
-                              alignment: Alignment.center,
-                              child: Text('${_post.minus.length}',
-                                  style: const TextStyle(
-                                      fontSize: 13,
-                                      fontWeight: FontWeight.bold)),
-                            ),
-                          ),
-                        ],
-                      ),
-                    ],
-                  ),
-                ),
-              ),
-              Padding(
-                padding: const EdgeInsets.only(
-                  bottom: 8.0,
-                  top: 8,
-                ),
-                child: SizedBox(
-                  width: 360,
-                  // decoration: BoxDecoration(
-                  //   border: Border(
-                  //     top: BorderSide(
-                  //         width: 1, color: Color.fromARGB(255, 218, 216, 216)),
-                  //   ),
-                  // ),
-                  // color: Colors.red,
-                  child: Padding(
-                    padding: const EdgeInsets.only(top: 6.0),
-                    child: InkWell(
-                      onTap: () => Navigator.of(context).push(
-                        MaterialPageRoute(
-                          builder: (context) => FullMessage(
-                              post: _post,
-                              indexPlacement: widget.indexPlacement),
-                        ),
-                      ),
-                      child: Container(
-                        child: Row(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: [
-                            Row(
-                              children: [
-                                const Icon(
-                                  Icons.comment_outlined,
-                                  size: 15,
-                                  color: Color.fromARGB(255, 132, 132, 132),
-                                ),
-                                Container(width: 8),
-                                Container(
-                                  child: Center(
-                                    // child: Text(
-                                    //   '$commentLen Comments',
-                                    //   style: const TextStyle(
-                                    //       fontSize: 13,
-                                    //       color:
-                                    //           Color.fromARGB(255, 132, 132, 132),
-                                    //       letterSpacing: 0.8),
-                                    child: StreamBuilder(
-                                      stream: FirebaseFirestore.instance
-                                          .collection('posts')
-                                          .doc(_post.postId)
-                                          .collection('comments')
-                                          .snapshots(),
-                                      builder: (content, snapshot) {
-                                        print(
-                                            'BEFORE SNAPSHOT _post.comments: ${widget.post.comments}');
-
-                                        return Text(
-                                          '${(snapshot.data as dynamic)?.docs.length ?? 0} Comments',
-                                          style: const TextStyle(
-                                              fontSize: 13,
-                                              color: Color.fromARGB(
-                                                  255, 132, 132, 132),
-                                              letterSpacing: 0.8),
-                                        );
-                                      },
+                                                  )
+                                                : _post.selected == 3
+                                                    ? LayoutBuilder(builder:
+                                                        (context, constraints) {
+                                                        if (kIsWeb &&
+                                                            constraints
+                                                                    .maxWidth >
+                                                                800) {
+                                                          return Row(
+                                                            crossAxisAlignment:
+                                                                CrossAxisAlignment
+                                                                    .start,
+                                                            children: [
+                                                              const Expanded(
+                                                                  child:
+                                                                      player),
+                                                              const SizedBox(
+                                                                width: 500,
+                                                              ),
+                                                            ],
+                                                          );
+                                                        }
+                                                        return SizedBox(
+                                                          width: 324,
+                                                          child: Stack(
+                                                            children: [
+                                                              player,
+                                                              Positioned.fill(
+                                                                child:
+                                                                    YoutubeValueBuilder(
+                                                                  controller:
+                                                                      controller,
+                                                                  builder:
+                                                                      (context,
+                                                                          value) {
+                                                                    return AnimatedCrossFade(
+                                                                      crossFadeState: value.isReady
+                                                                          ? CrossFadeState
+                                                                              .showSecond
+                                                                          : CrossFadeState
+                                                                              .showFirst,
+                                                                      duration: const Duration(
+                                                                          milliseconds:
+                                                                              300),
+                                                                      secondChild:
+                                                                          Container(
+                                                                              child: const SizedBox.shrink()),
+                                                                      firstChild:
+                                                                          Material(
+                                                                        child:
+                                                                            DecoratedBox(
+                                                                          child:
+                                                                              const Center(
+                                                                            child:
+                                                                                CircularProgressIndicator(),
+                                                                          ),
+                                                                          decoration:
+                                                                              BoxDecoration(
+                                                                            image:
+                                                                                DecorationImage(
+                                                                              image: NetworkImage(
+                                                                                YoutubePlayerController.getThumbnail(
+                                                                                  videoId: controller.initialVideoId,
+                                                                                  quality: ThumbnailQuality.medium,
+                                                                                ),
+                                                                              ),
+                                                                            ),
+                                                                          ),
+                                                                        ),
+                                                                      ),
+                                                                    );
+                                                                  },
+                                                                ),
+                                                              ),
+                                                            ],
+                                                          ),
+                                                        );
+                                                      })
+                                                    : Container()
+                                      ],
                                     ),
                                   ),
                                 ),
                               ],
                             ),
+                            Padding(
+                              padding: const EdgeInsets.only(
+                                top: 8,
+                              ),
+                              child: Container(
+                                height: 60,
+                                decoration: const BoxDecoration(
+                                  // color: Colors.orange,
+                                  border: Border(
+                                    top: BorderSide(
+                                        width: 1,
+                                        color:
+                                            Color.fromARGB(255, 218, 216, 216)),
+                                  ),
+                                ),
+                                child: Row(
+                                  mainAxisAlignment:
+                                      MainAxisAlignment.spaceBetween,
+                                  children: [
+                                    SizedBox(
+                                      // color: Colors.blue,
+                                      height: 60,
+                                      child: Column(
+                                        mainAxisAlignment:
+                                            MainAxisAlignment.end,
+                                        children: [
+                                          Container(
+                                              width: 90,
+                                              height: 39,
+                                              alignment: Alignment.bottomCenter,
+                                              child: Column(
+                                                  mainAxisAlignment:
+                                                      MainAxisAlignment.center,
+                                                  children: [
+                                                    Padding(
+                                                      padding:
+                                                          const EdgeInsets.only(
+                                                              top: 12.0),
+                                                      child: Text(placement,
+                                                          style:
+                                                              const TextStyle(
+                                                            fontSize: 22,
+                                                            fontWeight:
+                                                                FontWeight.bold,
+                                                            fontStyle: FontStyle
+                                                                .italic,
+                                                          )),
+                                                    )
+                                                  ])),
+                                          Container(
+                                            // color: Colors.green,
+                                            width: 88,
+                                            height: 19.3,
+                                            alignment: Alignment.center,
+                                            child: Row(
+                                              crossAxisAlignment:
+                                                  CrossAxisAlignment.start,
+                                              mainAxisAlignment:
+                                                  MainAxisAlignment.center,
+                                              children: [
+                                                const Text('Score:',
+                                                    textAlign: TextAlign.center,
+                                                    style: TextStyle(
+                                                        color: Colors.grey,
+                                                        fontSize: 13,
+                                                        letterSpacing: 0.8)),
+                                                Text(
+                                                  // testt > 10000
+                                                  //     ? testt.toString().replaceRange(
+                                                  //         3, testt.toString().length, 'k')
+                                                  //     : testt.toString(),
+                                                  // ' ${widget.snap['plus'].length - widget.snap['minus'].length}',
+                                                  // ' ${_post.plus.length - _post.minus.length}',
+                                                  ' ${_post.score}',
+                                                  // ' 32.4k',
+                                                  textAlign: TextAlign.center,
+                                                  style: const TextStyle(
+                                                    color: Colors.black,
+                                                    fontSize: 13,
+                                                    fontWeight: FontWeight.bold,
+                                                  ),
+                                                ),
+                                              ],
+                                            ),
+                                          ),
+                                        ],
+                                      ),
+                                    ),
+                                    Container(
+                                      // color: Colors.purple,
+                                      child: Stack(
+                                        children: [
+                                          Container(
+                                            alignment: Alignment.topCenter,
+                                            height: 60,
+                                            width: 59,
+                                            // color: Colors.orange,
+                                            child: LikeAnimation(
+                                              isAnimating: _post.plus
+                                                  .contains(user?.uid),
+                                              child: IconButton(
+                                                iconSize: 25,
+                                                onPressed: () {
+                                                  performLoggedUserAction(
+                                                      context: context,
+                                                      action: () async {
+                                                        await FirestoreMethods()
+                                                            .plusMessage(
+                                                          _post.postId,
+                                                          user?.uid ?? '',
+                                                          _post.plus,
+                                                        );
+                                                        FirestoreMethods()
+                                                            .scoreMessage(
+                                                                _post.postId,
+                                                                user?.uid ?? "",
+                                                                _post.plus
+                                                                        .length -
+                                                                    _post.minus
+                                                                        .length);
+                                                      });
+                                                },
+                                                icon: _post.plus
+                                                        .contains(user?.uid)
+                                                    ? const Icon(
+                                                        Icons.add_circle,
+                                                        color: Colors.green,
+                                                      )
+                                                    : const Icon(
+                                                        Icons.add_circle,
+                                                        color: Color.fromARGB(
+                                                            255, 206, 204, 204),
+                                                      ),
+                                              ),
+                                            ),
+                                          ),
+                                          Positioned(
+                                            top: 42,
+                                            child: Container(
+                                              width: 59,
+                                              alignment: Alignment.center,
+                                              child: Text(
+                                                  '${_post.plus.length}',
+                                                  // '32.4k',
+                                                  style: const TextStyle(
+                                                      fontSize: 13,
+                                                      fontWeight:
+                                                          FontWeight.bold)),
+                                            ),
+                                          ),
+                                        ],
+                                      ),
+                                    ),
+                                    Stack(
+                                      children: [
+                                        Container(
+                                          alignment: Alignment.topCenter,
+                                          height: 60,
+                                          width: 59,
+                                          // color: Colors.blue,
+                                          child: LikeAnimation(
+                                            isAnimating: _post.neutral
+                                                .contains(user?.uid),
+                                            child: IconButton(
+                                              iconSize: 25,
+                                              onPressed: () {
+                                                performLoggedUserAction(
+                                                    context: context,
+                                                    action: () async {
+                                                      await FirestoreMethods()
+                                                          .neutralMessage(
+                                                        _post.postId,
+                                                        user?.uid ?? '',
+                                                        _post.neutral,
+                                                      );
+                                                      FirestoreMethods()
+                                                          .scoreMessage(
+                                                              _post.postId,
+                                                              user?.uid ?? '',
+                                                              _post.plus
+                                                                      .length -
+                                                                  _post.minus
+                                                                      .length);
+                                                    });
+                                              },
+                                              icon: _post.neutral
+                                                      .contains(user?.uid)
+                                                  ? const RotatedBox(
+                                                      quarterTurns: 1,
+                                                      child: Icon(
+                                                        Icons
+                                                            .pause_circle_filled,
+                                                        color: Color.fromARGB(
+                                                            255, 111, 111, 111),
+                                                      ),
+                                                    )
+                                                  : const RotatedBox(
+                                                      quarterTurns: 1,
+                                                      child: Icon(
+                                                        Icons
+                                                            .pause_circle_filled,
+                                                        color: Color.fromARGB(
+                                                            255, 206, 204, 204),
+                                                      ),
+                                                    ),
+                                            ),
+                                          ),
+                                        ),
+                                        Positioned(
+                                          top: 42,
+                                          // right: 24,
+                                          child: Container(
+                                            width: 59,
+                                            // color: Colors.yellow,
+                                            alignment: Alignment.center,
+                                            child: Text(
+                                                '${_post.neutral.length}',
+                                                style: const TextStyle(
+                                                    fontSize: 13,
+                                                    fontWeight:
+                                                        FontWeight.bold)),
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                                    Stack(
+                                      children: [
+                                        Container(
+                                          alignment: Alignment.topCenter,
+                                          height: 60,
+                                          width: 59,
+                                          child: LikeAnimation(
+                                            isAnimating:
+                                                _post.minus.contains(user?.uid),
+                                            child: Container(
+                                              child: IconButton(
+                                                iconSize: 25,
+                                                onPressed: () {
+                                                  _post.global == "true"
+                                                      ? performLoggedUserAction(
+                                                          context: context,
+                                                          action: () async {
+                                                            await FirestoreMethods()
+                                                                .minusMessage(
+                                                              _post.postId,
+                                                              user?.uid ?? '',
+                                                              _post.minus,
+                                                            );
+                                                            FirestoreMethods()
+                                                                .scoreMessage(
+                                                                    _post
+                                                                        .postId,
+                                                                    user?.uid ??
+                                                                        '',
+                                                                    _post.plus
+                                                                            .length -
+                                                                        _post
+                                                                            .minus
+                                                                            .length);
+                                                          })
+                                                      : performLoggedUserAction(
+                                                          context: context,
+                                                          action: () async {
+                                                            await FirestoreMethods()
+                                                                .minusMessage(
+                                                              _post.postId,
+                                                              user?.uid ?? '',
+                                                              _post.minus,
+                                                            );
+                                                            FirestoreMethods()
+                                                                .scoreMessage(
+                                                                    _post
+                                                                        .postId,
+                                                                    user?.uid ??
+                                                                        '',
+                                                                    _post.plus
+                                                                            .length -
+                                                                        _post
+                                                                            .minus
+                                                                            .length);
+                                                          });
+                                                },
+                                                icon: _post.minus
+                                                        .contains(user?.uid)
+                                                    ? const Icon(
+                                                        Icons.do_not_disturb_on,
+                                                        color: Colors.red,
+                                                      )
+                                                    : const Icon(
+                                                        Icons.do_not_disturb_on,
+                                                        color: Color.fromARGB(
+                                                            255, 206, 204, 204),
+                                                      ),
+                                              ),
+                                            ),
+                                          ),
+                                        ),
+                                        Positioned(
+                                          top: 42,
+                                          child: Container(
+                                            width: 59,
+                                            alignment: Alignment.center,
+                                            child: Text('${_post.minus.length}',
+                                                style: const TextStyle(
+                                                    fontSize: 13,
+                                                    fontWeight:
+                                                        FontWeight.bold)),
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                                  ],
+                                ),
+                              ),
+                            ),
+                            Padding(
+                              padding: const EdgeInsets.only(
+                                bottom: 8.0,
+                                top: 8,
+                              ),
+                              child: SizedBox(
+                                width: 360,
+                                // decoration: BoxDecoration(
+                                //   border: Border(
+                                //     top: BorderSide(
+                                //         width: 1, color: Color.fromARGB(255, 218, 216, 216)),
+                                //   ),
+                                // ),
+                                // color: Colors.red,
+                                child: Padding(
+                                  padding: const EdgeInsets.only(top: 6.0),
+                                  child: InkWell(
+                                    onTap: () => Navigator.of(context).push(
+                                      MaterialPageRoute(
+                                        builder: (context) => FullMessage(
+                                            post: _post,
+                                            indexPlacement:
+                                                widget.indexPlacement),
+                                      ),
+                                    ),
+                                    child: Container(
+                                      child: Row(
+                                        mainAxisAlignment:
+                                            MainAxisAlignment.center,
+                                        children: [
+                                          Row(
+                                            children: [
+                                              const Icon(
+                                                Icons.comment_outlined,
+                                                size: 15,
+                                                color: Color.fromARGB(
+                                                    255, 132, 132, 132),
+                                              ),
+                                              Container(width: 8),
+                                              Container(
+                                                child: Center(
+                                                  // child: Text(
+                                                  //   '$commentLen Comments',
+                                                  //   style: const TextStyle(
+                                                  //       fontSize: 13,
+                                                  //       color:
+                                                  //           Color.fromARGB(255, 132, 132, 132),
+                                                  //       letterSpacing: 0.8),
+                                                  child: StreamBuilder(
+                                                    stream: FirebaseFirestore
+                                                        .instance
+                                                        .collection('posts')
+                                                        .doc(_post.postId)
+                                                        .collection('comments')
+                                                        .snapshots(),
+                                                    builder:
+                                                        (content, snapshot) {
+                                                      print(
+                                                          'BEFORE SNAPSHOT _post.comments: ${widget.post.comments}');
+
+                                                      return Text(
+                                                        '${(snapshot.data as dynamic)?.docs.length ?? 0} Comments',
+                                                        style: const TextStyle(
+                                                            fontSize: 13,
+                                                            color:
+                                                                Color.fromARGB(
+                                                                    255,
+                                                                    132,
+                                                                    132,
+                                                                    132),
+                                                            letterSpacing: 0.8),
+                                                      );
+                                                    },
+                                                  ),
+                                                ),
+                                              ),
+                                            ],
+                                          ),
+                                        ],
+                                      ),
+                                    ),
+                                  ),
+                                ),
+                              ),
+                            ),
                           ],
-                        ),
-                      ),
-                    ),
-                  ),
-                ),
+                        )
+                      : Container(
+                          height: 100,
+                          child: Center(
+                            child: Text("Blocked User"),
+                          ),
+                        );
+                },
               ),
             ],
           ),
